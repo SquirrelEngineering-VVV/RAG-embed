@@ -14,32 +14,55 @@ echo "============================================="
 echo "  🚀 Starting Portable AI Stack from USB..."
 echo "============================================="
 
+
+# ---------------------------------------------------------
+# Check & Fetch Missing Assets
+# ---------------------------------------------------------
+CPYTHON_TAR="$USB_DIR/asset/cpython.tar.gz"
+OLLAMA_TAR="$USB_DIR/asset/ollama.tar.zst"
+DOWNLOAD_SCRIPT="$USB_DIR/script/download-asset.sh"
+
+if [ ! -f "$CPYTHON_TAR" ] || [ ! -f "$OLLAMA_TAR" ]; then
+    echo "⚠️  Missing required archives in asset/. Running download script..."
+    if [ -f "$DOWNLOAD_SCRIPT" ]; then
+        chmod +x "$DOWNLOAD_SCRIPT"
+        "$DOWNLOAD_SCRIPT"
+    else
+        echo "❌ Error: Download script not found at $DOWNLOAD_SCRIPT"
+        exit 1
+    fi
+fi
+
 # ---------------------------------------------------------
 # Step 0: Extract Tarballs & Prepare Environment
 # ---------------------------------------------------------
 
 # Extract standalone CPython (cpython.tar.gz)
-if [ ! -d "$USB_DIR/engine/python" ]; then
-    if [ -f "$USB_DIR/cpython.tar.gz" ]; then
+if [ ! -f "$PYTHON_BIN" ]; then
+    if [ -f "$USB_DIR/asset/cpython.tar.gz" ]; then
         echo "📦 Extracting CPython runtime (cpython.tar.gz)..."
-        mkdir -p "$USB_DIR/engine/python"
-        tar -xzf "$USB_DIR/cpython.tar.gz" -C "$USB_DIR/engine/python" --strip-components=1 2>/dev/null || \
-        tar -xzf "$USB_DIR/cpython.tar.gz" -C "$USB_DIR/engine"
+        mkdir -p "$USB_DIR/engine"
+        tar -xzf "$USB_DIR/asset/cpython.tar.gz" -C "$USB_DIR/engine"
     fi
+fi
+
+# Fallback check for Python binary layout
+if [ ! -f "$PYTHON_BIN" ] && [ -f "$USB_DIR/engine/bin/python3" ]; then
+    PYTHON_BIN="$USB_DIR/engine/bin/python3"
 fi
 
 # Extract Ollama binaries (ollama.tar.zst)
 if [ ! -d "$USB_DIR/engine/ollama" ]; then
-    if [ -f "$USB_DIR/ollama.tar.zst" ]; then
+    if [ -f "$USB_DIR/asset/ollama.tar.zst" ]; then
         echo "📦 Extracting Ollama binaries (ollama.tar.zst)..."
         mkdir -p "$USB_DIR/engine/ollama"
         
         # Try tar with native zstd support first, fall back to zstd pipe
-        if tar --zstd -xf "$USB_DIR/ollama.tar.zst" -C "$USB_DIR/engine/ollama" --strip-components=1 2>/dev/null; then
+        if tar --zstd -xf "$USB_DIR/asset/ollama.tar.zst" -C "$USB_DIR/engine/ollama" --strip-components=1 2>/dev/null; then
             :
         elif command -v zstd >/dev/null 2>&1; then
-            zstd -dc "$USB_DIR/ollama.tar.zst" | tar -xf - -C "$USB_DIR/engine/ollama" --strip-components=1 2>/dev/null || \
-            zstd -dc "$USB_DIR/ollama.tar.zst" | tar -xf - -C "$USB_DIR/engine"
+            zstd -dc "$USB_DIR/asset/ollama.tar.zst" | tar -xf - -C "$USB_DIR/engine/ollama" --strip-components=1 2>/dev/null || \
+            zstd -dc "$USB_DIR/asset/ollama.tar.zst" | tar -xf - -C "$USB_DIR/engine"
         else
             echo "❌ Error: 'zstd' utility is required to extract ollama.tar.zst."
             exit 1
