@@ -85,11 +85,4 @@ If you prefer to download binary assets manually rather than running `download-a
 * `asset/cpython.tar.gz` — Standalone CPython 3.11 build from `indygreg/python-build-standalone`
 * `asset/ollama.tar.zst` — Ollama Linux x86_64 binary release archive
 
-```
 
-<ElicitationsGroup message="What would you like to do next?">
-  <Elicitation label="Add license and contributing section to README" query="Add a license (MIT) and contribution guidelines section to the README.md file."/>
-  <Elicitation label="Add sample usage examples to README" query="Add an example CLI session showing how setup_and_sync.py and run.py interact with raw_notes."/>
-</ElicitationsGroup>
-
-```
