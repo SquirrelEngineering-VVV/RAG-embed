@@ -121,6 +121,17 @@ mkdir -p "$USB_DIR/data/raw_notes"
 # ---------------------------------------------------------
 # Step 2: Start local Ollama daemon
 # ---------------------------------------------------------
+
+# Detect port collision to avoid using system-wide Ollama
+PORT=11434
+while command -v ss >/dev/null 2>&1 && ss -tln | grep -q ":$PORT "; do
+    echo "⚠️  Port $PORT is already in use. Trying fallback port $((PORT+1))..."
+    PORT=$((PORT+1))
+done
+
+export OLLAMA_HOST="127.0.0.1:$PORT"
+echo "🌐 Ollama server will run on $OLLAMA_HOST"
+
 $OLLAMA_BIN serve > /dev/null 2>&1 &
 OLLAMA_PID=$!
 

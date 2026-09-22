@@ -11,7 +11,8 @@ MODEL_DIR = os.path.join(BASE_DIR, "data", "models")
 MANIFEST_PATH = os.path.join(BASE_DIR, "data", "sync_manifest.json")
 
 # Ensure Ollama checks the USB drive for models
-os.environ["OLLAMA_MODELS"] = MODEL_DIR
+# Note: This environment variable must be set for the OLLAMA server process, not the client script.
+# It is already handled in start.sh.
 
 def pull_required_models():
     """Ensure required models are installed locally on USB."""
